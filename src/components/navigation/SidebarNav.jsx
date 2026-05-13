@@ -1,14 +1,15 @@
-import { memo } from "react";
+import { memo, useState } from "react";
 import { motion } from "framer-motion";
 import { useTheme } from "@/context/ThemeContext";
 
-function SidebarNav({ sidebarOpen, setSidebarOpen, navItems, activeSection, onSelect }) {
+function SidebarNav({ navItems, activeSection, onSelect }) {
   const { tokens } = useTheme();
+  const [open, setOpen] = useState(true);
 
   return (
     <motion.aside
       initial={false}
-      animate={{ width: sidebarOpen ? 220 : 72 }}
+      animate={{ width: open ? 220 : 64 }}
       transition={{ type: "spring", stiffness: 300, damping: 30 }}
       style={{
         flexShrink: 0,
@@ -19,9 +20,9 @@ function SidebarNav({ sidebarOpen, setSidebarOpen, navItems, activeSection, onSe
         overflow: "hidden",
       }}
     >
-      {/* Logo / toggle */}
+      {/* Logo / collapse toggle */}
       <button
-        onClick={() => setSidebarOpen((o) => !o)}
+        onClick={() => setOpen((o) => !o)}
         aria-label="Toggle sidebar"
         style={{
           border: "none",
@@ -37,7 +38,7 @@ function SidebarNav({ sidebarOpen, setSidebarOpen, navItems, activeSection, onSe
           flexShrink: 0,
         }}
       >
-        {sidebarOpen ? "💰 Mind Finance" : "💰"}
+        {open ? "💰 Mind Finance" : "💰"}
       </button>
 
       {/* Nav items */}
@@ -77,7 +78,7 @@ function SidebarNav({ sidebarOpen, setSidebarOpen, navItems, activeSection, onSe
               }}
             >
               <span style={{ fontSize: 16, flexShrink: 0 }}>{n.icon}</span>
-              {sidebarOpen && <span>{n.label}</span>}
+              {open && <span>{n.label}</span>}
             </button>
           );
         })}

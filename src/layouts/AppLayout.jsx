@@ -1,8 +1,11 @@
-import { memo, useEffect, useState } from "react";
+import { memo } from "react";
 import SidebarNav from "@/components/navigation/SidebarNav";
 import MobileBottomNav from "@/components/navigation/MobileBottomNav";
 import PrimaryButton from "@/components/ui/PrimaryButton";
 import { useTheme } from "@/context/ThemeContext";
+import { useIsMobile } from "@/hooks/useIsMobile";
+
+const SIDEBAR_BREAKPOINT = 960;
 
 function AppLayout({
   title,
@@ -15,21 +18,15 @@ function AppLayout({
   themeToggle,
 }) {
   const { tokens } = useTheme();
-  const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [isMobile, setIsMobile] = useState(false);
-
-  useEffect(() => {
-    const onResize = () => setIsMobile(window.innerWidth < 960);
-    onResize();
-    window.addEventListener("resize", onResize);
-    return () => window.removeEventListener("resize", onResize);
-  }, []);
+  const isMobile = useIsMobile(SIDEBAR_BREAKPOINT);
 
   return (
     <div
       style={{
         display: "flex",
-        height: "100vh",
+        height: "100dvh",
+        /* fallback for browsers that don't support dvh */
+        ...(CSS.supports("height", "100dvh") ? {} : { height: "100vh" }),
         background: tokens.bg.base,
         color: tokens.text.primary,
         overflow: "hidden",
@@ -37,8 +34,6 @@ function AppLayout({
     >
       {!isMobile && (
         <SidebarNav
-          sidebarOpen={sidebarOpen}
-          setSidebarOpen={setSidebarOpen}
           navItems={navItems}
           activeSection={activeSection}
           onSelect={onSelectSection}
@@ -50,24 +45,23 @@ function AppLayout({
         <header
           role="banner"
           style={{
-            height: 62,
+            height: isMobile ? 54 : 62,
             borderBottom: `1px solid ${tokens.header.border}`,
             display: "flex",
             alignItems: "center",
-            gap: 10,
-            padding: "0 16px",
+            gap: 8,
+            padding: isMobile ? "0 12px" : "0 16px",
             background: tokens.header.bg,
             backdropFilter: tokens.header.backdropFilter,
             flexShrink: 0,
           }}
         >
-          {/* Mobile hamburger placeholder – MobileBottomNav handles nav */}
           <h1
             style={{
               flex: 1,
               fontWeight: 700,
               margin: 0,
-              fontSize: isMobile ? 15 : 16,
+              fontSize: isMobile ? 14 : 16,
               color: tokens.text.primary,
               whiteSpace: "nowrap",
               overflow: "hidden",
@@ -77,21 +71,26 @@ function AppLayout({
             {isMobile ? "💰 Mind Finance" : title}
           </h1>
 
-          {/* Balance chip */}
+          {/* Balance chip — always visible */}
           <div
             style={{
-              padding: "5px 10px",
+              padding: isMobile ? "4px 8px" : "5px 10px",
               borderRadius: 10,
               border: `1px solid ${tokens.border.default}`,
               background: tokens.bg.muted,
               whiteSpace: "nowrap",
               flexShrink: 0,
+              display: "flex",
+              alignItems: "center",
+              gap: 4,
             }}
           >
-            <span style={{ fontSize: 10, color: tokens.text.tertiary, textTransform: "uppercase" }}>
-              Balance
-            </span>
-            <span style={{ fontSize: 14, fontWeight: 700, marginLeft: 6, color: tokens.text.primary }}>
+            {!isMobile && (
+              <span style={{ fontSize: 10, color: tokens.text.tertiary, textTransform: "uppercase" }}>
+                Balance
+              </span>
+            )}
+            <span style={{ fontSize: isMobile ? 13 : 14, fontWeight: 700, color: tokens.text.primary }}>
               {balanceLabel}
             </span>
           </div>
@@ -99,8 +98,12 @@ function AppLayout({
           {/* Theme toggle — desktop only */}
           {!isMobile && themeToggle}
 
-          {/* Quick-add button */}
-          <PrimaryButton ariaLabel="Registrar transaccion" onClick={onQuickAdd}>
+          {/* Quick-add */}
+          <PrimaryButton
+            ariaLabel="Registrar transaccion"
+            onClick={onQuickAdd}
+            style={isMobile ? { padding: "7px 14px", fontSize: 20, lineHeight: 1, minWidth: 0 } : {}}
+          >
             {isMobile ? "+" : "Registrar"}
           </PrimaryButton>
         </header>
@@ -112,7 +115,11 @@ function AppLayout({
           style={{
             flex: 1,
             overflowY: "auto",
-            padding: isMobile ? "14px 12px 104px" : "16px",
+            overflowX: "hidden",
+            padding: isMobile
+              ? "12px 12px calc(80px + env(safe-area-inset-bottom))"
+              : "16px",
+            WebkitOverflowScrolling: "touch",
           }}
         >
           {children}

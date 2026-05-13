@@ -8,8 +8,11 @@ import StatCard from "@/components/finance/StatCard";
 import TxItem from "@/components/finance/TxItem";
 import { MONTHLY_DATA, fmtShort } from "@/data/financeData";
 import ChartCard from "@/components/charts/ChartCard";
+import { useIsMobile } from "@/hooks/useIsMobile";
 
 function DashboardSection({ transactions, categories, tokens }) {
+  const isMobile = useIsMobile();
+
   const { income, expenses, savings, recentTx } = useMemo(() => {
     const income   = transactions.filter((t) => t.type === "income" ).reduce((a, t) => a + t.amount, 0);
     const expenses = transactions.filter((t) => t.type === "expense").reduce((a, t) => a + t.amount, 0);
@@ -23,25 +26,25 @@ function DashboardSection({ transactions, categories, tokens }) {
 
   return (
     <div style={{ display: "grid", gap: 14 }}>
-      {/* KPI row */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(170px,1fr))", gap: 12 }}>
-        <StatCard label="Balance"    value={fmtShort(savings)} />
-        <StatCard label="Ingresos"   value={fmtShort(income)}   color={tokens.accent.green} />
-        <StatCard label="Gastos"     value={fmtShort(expenses)} color={tokens.accent.red}   />
+      {/* KPI row — 2 cols on mobile, 4 on desktop */}
+      <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr 1fr" : "repeat(4,1fr)", gap: 10 }}>
+        <StatCard label="Balance"     value={fmtShort(savings)} />
+        <StatCard label="Ingresos"    value={fmtShort(income)}   color={tokens.accent.green} />
+        <StatCard label="Gastos"      value={fmtShort(expenses)} color={tokens.accent.red}   />
         <StatCard label="Ahorro neto" value={fmtShort(Math.max(savings, 0))} color={tokens.accent.indigo} />
       </div>
 
-      {/* Chart + recent transactions */}
+      {/* Chart + recent — stacked on mobile, side by side on desktop */}
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: "minmax(0,1fr) minmax(220px,320px)",
+          gridTemplateColumns: isMobile ? "1fr" : "minmax(0,1fr) minmax(220px,300px)",
           gap: 12,
         }}
       >
         <ChartCard title="Flujo de Caja · 6 meses" height={220}>
           <ResponsiveContainer width="100%" height={220}>
-            <AreaChart data={MONTHLY_DATA} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
+            <AreaChart data={MONTHLY_DATA} margin={{ top: 4, right: 4, left: -16, bottom: 0 }}>
               <defs>
                 <linearGradient id="gIncome"  x1="0" y1="0" x2="0" y2="1">
                   <stop offset="5%"  stopColor={tokens.chart.income}  stopOpacity={tokens.chart.areaOpacityHigh} />
@@ -53,8 +56,19 @@ function DashboardSection({ transactions, categories, tokens }) {
                 </linearGradient>
               </defs>
               <CartesianGrid strokeDasharray="3 3" stroke={tokens.chart.grid} />
-              <XAxis dataKey="month" tick={{ fill: tokens.chart.tick, fontSize: 12 }} axisLine={false} tickLine={false} />
-              <YAxis tick={{ fill: tokens.chart.tick, fontSize: 11 }} axisLine={false} tickLine={false} tickFormatter={(v) => fmtShort(v)} />
+              <XAxis
+                dataKey="month"
+                tick={{ fill: tokens.chart.tick, fontSize: isMobile ? 10 : 12 }}
+                axisLine={false}
+                tickLine={false}
+              />
+              <YAxis
+                tick={{ fill: tokens.chart.tick, fontSize: 10 }}
+                axisLine={false}
+                tickLine={false}
+                tickFormatter={(v) => fmtShort(v)}
+                width={isMobile ? 42 : 52}
+              />
               <Tooltip
                 contentStyle={{
                   background:   tokens.chart.tooltip.bg,
