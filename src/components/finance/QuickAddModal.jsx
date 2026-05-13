@@ -8,7 +8,6 @@ const METHODS = ["Debito", "Credito", "Transferencia", "Efectivo", "App"];
 function defaultDate(activeMonth) {
   if (!activeMonth || activeMonth === "all") return new Date().toISOString().slice(0, 10);
   const today = new Date().toISOString().slice(0, 7);
-  // If active month is current month → use today; otherwise → first day of that month
   return activeMonth === today ? new Date().toISOString().slice(0, 10) : `${activeMonth}-01`;
 }
 
@@ -26,14 +25,15 @@ export default function QuickAddModal({ onClose, onSave, categories, activeMonth
 
   const inp = {
     width: "100%",
-    padding: "10px 12px",
+    padding: "11px 13px",
     borderRadius: 12,
     border: `1px solid ${tokens.border.default}`,
     background: tokens.input.bg,
     color: tokens.input.color,
-    fontSize: 14,
+    fontSize: 15,
     outline: "none",
     colorScheme: tokens.input.colorScheme,
+    minWidth: 0,
   };
 
   const handleSave = () => {
@@ -55,48 +55,78 @@ export default function QuickAddModal({ onClose, onSave, categories, activeMonth
       </div>
 
       <div style={{ display: "grid", gap: 10 }}>
+        {/* Type selector — tabs */}
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "1fr 1fr 1fr",
+            gap: 6,
+            background: tokens.bg.muted,
+            borderRadius: 12,
+            padding: 4,
+          }}
+        >
+          {[
+            { val: "expense", label: "Gasto",   color: tokens.accent.red    },
+            { val: "income",  label: "Ingreso",  color: tokens.accent.green  },
+            { val: "savings", label: "Ahorro",   color: tokens.accent.indigo },
+          ].map(({ val, label, color }) => (
+            <button
+              key={val}
+              onClick={() => setForm((p) => ({ ...p, type: val }))}
+              style={{
+                padding: "9px 4px",
+                borderRadius: 9,
+                border: "none",
+                background: form.type === val ? tokens.bg.surface : "transparent",
+                color: form.type === val ? color : tokens.text.tertiary,
+                fontWeight: form.type === val ? 700 : 400,
+                fontSize: 13,
+                cursor: "pointer",
+                boxShadow: form.type === val ? tokens.shadow.card : "none",
+                transition: "all .15s",
+              }}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+
         <input
           aria-label="Descripcion"
-          placeholder="Descripcion *"
+          placeholder="Descripción *"
           value={form.name}
           onChange={set("name")}
           style={inp}
+          autoFocus
         />
         <input
           aria-label="Valor"
           placeholder="Valor * (ej: 150000)"
           value={form.amount}
           onChange={set("amount")}
+          inputMode="decimal"
           style={inp}
         />
 
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
-          <select aria-label="Tipo" value={form.type} onChange={set("type")} style={inp}>
-            <option value="expense">Gasto</option>
-            <option value="income">Ingreso</option>
-            <option value="savings">Ahorro</option>
-          </select>
           <select aria-label="Categoria" value={form.category} onChange={set("category")} style={inp}>
             {categories.map((c) => (
-              <option key={c.id} value={c.name}>
-                {c.emoji} {c.name}
-              </option>
+              <option key={c.id} value={c.name}>{c.emoji} {c.name}</option>
             ))}
+          </select>
+          <select aria-label="Metodo de pago" value={form.method} onChange={set("method")} style={inp}>
+            {METHODS.map((m) => <option key={m} value={m}>{m}</option>)}
           </select>
         </div>
 
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
-          <select aria-label="Metodo" value={form.method} onChange={set("method")} style={inp}>
-            {METHODS.map((m) => <option key={m} value={m}>{m}</option>)}
-          </select>
-          <input
-            aria-label="Fecha"
-            type="date"
-            value={form.date}
-            onChange={set("date")}
-            style={inp}
-          />
-        </div>
+        <input
+          aria-label="Fecha"
+          type="date"
+          value={form.date}
+          onChange={set("date")}
+          style={inp}
+        />
 
         <input
           aria-label="Nota"
@@ -114,8 +144,9 @@ export default function QuickAddModal({ onClose, onSave, categories, activeMonth
           style={{
             ...inp,
             width: "auto",
-            padding: "8px 16px",
+            padding: "10px 18px",
             cursor: "pointer",
+            fontSize: 14,
           }}
         >
           Cancelar

@@ -2,8 +2,10 @@ import { memo, useState } from "react";
 import GlassCard from "@/components/ui/GlassCard";
 import PrimaryButton from "@/components/ui/PrimaryButton";
 import { ThemeToggle } from "@/context/ThemeContext";
+import { useTheme } from "@/context/ThemeContext";
 
-function SettingsSection({ transactions, tokens }) {
+function SettingsSection({ transactions }) {
+  const { tokens } = useTheme();
   const [exportMsg, setExportMsg] = useState("");
 
   const flash = (msg) => {
@@ -41,14 +43,7 @@ function SettingsSection({ transactions, tokens }) {
       {/* Appearance */}
       <GlassCard>
         <SectionTitle label="Apariencia" tokens={tokens} />
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            padding: "8px 0",
-          }}
-        >
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "8px 0" }}>
           <span style={{ fontSize: 14, color: tokens.text.secondary }}>Tema</span>
           <ThemeToggle />
         </div>
@@ -57,11 +52,11 @@ function SettingsSection({ transactions, tokens }) {
       {/* Profile */}
       <GlassCard>
         <SectionTitle label="Perfil" tokens={tokens} />
-        <Row label="Moneda"           value="COP — Peso Colombiano" tokens={tokens} />
+        <Row label="Moneda"        value="COP — Peso Colombiano"              tokens={tokens} />
         <div style={divider} />
-        <Row label="Zona horaria"     value="America/Bogota"        tokens={tokens} />
+        <Row label="Zona horaria"  value="America/Bogota"                     tokens={tokens} />
         <div style={divider} />
-        <Row label="Transacciones"    value={`${transactions.length} registros`} tokens={tokens} />
+        <Row label="Transacciones" value={`${transactions.length} registros`} tokens={tokens} />
       </GlassCard>
 
       {/* Export */}
@@ -84,11 +79,11 @@ function SettingsSection({ transactions, tokens }) {
       {/* Storage */}
       <GlassCard>
         <SectionTitle label="Almacenamiento" tokens={tokens} />
-        <Row label="Persistencia"           value="localStorage (local)"    tokens={tokens} />
+        <Row label="Persistencia"      value="localStorage (local)"                 tokens={tokens} />
         <div style={divider} />
-        <Row label="Sync Supabase"          value="Disponible vía .env"     tokens={tokens} />
+        <Row label="Sync Supabase"     value="Disponible vía .env"                  tokens={tokens} />
         <div style={divider} />
-        <Row label="Atajos de teclado"      value="N = nueva tx · Ctrl+K = búsqueda" tokens={tokens} />
+        <Row label="Atajos de teclado" value="N = nueva tx · Ctrl+K = búsqueda"     tokens={tokens} />
       </GlassCard>
 
       {/* Danger zone */}
@@ -100,12 +95,13 @@ function SettingsSection({ transactions, tokens }) {
         <button
           onClick={clearAll}
           style={{
-            padding: "8px 16px",
+            width: "100%",
+            padding: "12px 16px",
             borderRadius: 10,
             background: tokens.accent.redDim,
             border: `1px solid ${tokens.accent.red}40`,
             color: tokens.accent.red,
-            fontSize: 13,
+            fontSize: 14,
             fontWeight: 600,
             cursor: "pointer",
           }}
@@ -121,16 +117,14 @@ function SettingsSection({ transactions, tokens }) {
 
 function SectionTitle({ label, tokens }) {
   return (
-    <div
-      style={{
-        fontSize: 11,
-        color: tokens.text.tertiary,
-        textTransform: "uppercase",
-        fontWeight: 700,
-        letterSpacing: "0.06em",
-        marginBottom: 12,
-      }}
-    >
+    <div style={{
+      fontSize: 11,
+      color: tokens.text.tertiary,
+      textTransform: "uppercase",
+      fontWeight: 700,
+      letterSpacing: "0.06em",
+      marginBottom: 12,
+    }}>
       {label}
     </div>
   );
@@ -138,9 +132,18 @@ function SectionTitle({ label, tokens }) {
 
 function Row({ label, value, tokens }) {
   return (
-    <div style={{ display: "flex", justifyContent: "space-between", padding: "8px 0", fontSize: 14 }}>
-      <span style={{ color: tokens.text.secondary }}>{label}</span>
-      <span style={{ color: tokens.text.tertiary,  textAlign: "right", maxWidth: "55%" }}>{value}</span>
+    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "8px 0", fontSize: 14, gap: 8 }}>
+      <span style={{ color: tokens.text.secondary, flexShrink: 0 }}>{label}</span>
+      <span style={{
+        color: tokens.text.tertiary,
+        textAlign: "right",
+        overflow: "hidden",
+        textOverflow: "ellipsis",
+        whiteSpace: "nowrap",
+        minWidth: 0,
+      }}>
+        {value}
+      </span>
     </div>
   );
 }

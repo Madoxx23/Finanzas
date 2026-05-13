@@ -99,11 +99,19 @@ function SubCard({ sub, tokens, onEdit, onDelete }) {
     : "trim.";
 
   return (
-    <GlassCard style={{ display: "flex", alignItems: "center", gap: 12, padding: "14px 16px" }}>
-      <div style={{ fontSize: 26, flexShrink: 0 }}>{sub.emoji}</div>
+    <GlassCard style={{ display: "flex", alignItems: "center", gap: 10, padding: "12px 14px" }}>
+      <div style={{ fontSize: 24, flexShrink: 0 }}>{sub.emoji}</div>
       <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ fontSize: 15, fontWeight: 600, color: tokens.text.primary }}>{sub.name}</div>
-        <div style={{ fontSize: 12, color: tokens.text.tertiary, marginTop: 2 }}>
+        <div style={{
+          fontSize: 15, fontWeight: 600, color: tokens.text.primary,
+          overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+        }}>
+          {sub.name}
+        </div>
+        <div style={{
+          fontSize: 12, color: tokens.text.tertiary, marginTop: 2,
+          overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+        }}>
           {sub.category} · {sub.billing} · próximo: {sub.next}
         </div>
       </div>
@@ -119,7 +127,7 @@ function SubCard({ sub, tokens, onEdit, onDelete }) {
           style={{
             background: tokens.bg.subtle,
             border: `1px solid ${tokens.border.default}`,
-            borderRadius: 8, padding: "6px 8px", cursor: "pointer", fontSize: 13,
+            borderRadius: 8, padding: "6px 8px", cursor: "pointer", fontSize: 14,
           }}
         >
           ✏️
@@ -127,9 +135,8 @@ function SubCard({ sub, tokens, onEdit, onDelete }) {
         <button
           onClick={onDelete}
           style={{
-            background: tokens.accent.redDim,
-            border: "none",
-            borderRadius: 8, padding: "6px 8px", cursor: "pointer", fontSize: 13,
+            background: tokens.accent.redDim, border: "none",
+            borderRadius: 8, padding: "6px 8px", cursor: "pointer", fontSize: 14,
           }}
         >
           🗑️
@@ -153,14 +160,15 @@ function SubModal({ initial, tokens, onSave, onClose }) {
 
   const inp = {
     width: "100%",
-    padding: "9px 12px",
+    padding: "11px 13px",
     borderRadius: 10,
     border: `1px solid ${tokens.border.default}`,
     background: tokens.input.bg,
     color: tokens.input.color,
-    fontSize: 14,
+    fontSize: 15,
     outline: "none",
     colorScheme: tokens.input.colorScheme,
+    minWidth: 0,
   };
 
   const set = (key) => (e) => setForm((p) => ({ ...p, [key]: e.target.value }));
@@ -176,13 +184,13 @@ function SubModal({ initial, tokens, onSave, onClose }) {
         {initial ? "Editar Suscripción" : "Nueva Suscripción"}
       </div>
       <div style={{ display: "grid", gap: 10 }}>
-        <div style={{ display: "grid", gridTemplateColumns: "56px 1fr", gap: 8 }}>
-          <select value={form.emoji} onChange={set("emoji")} style={{ ...inp, fontSize: 18, textAlign: "center" }}>
+        <div style={{ display: "grid", gridTemplateColumns: "60px 1fr", gap: 8 }}>
+          <select value={form.emoji} onChange={set("emoji")} style={{ ...inp, fontSize: 20, textAlign: "center", padding: "8px 4px" }}>
             {EMOJI_OPTS.map((e) => <option key={e} value={e}>{e}</option>)}
           </select>
-          <input placeholder="Nombre del servicio *" value={form.name} onChange={set("name")} style={inp} />
+          <input placeholder="Nombre del servicio *" value={form.name} onChange={set("name")} style={inp} autoFocus />
         </div>
-        <input placeholder="Monto *" value={form.amount} onChange={set("amount")} style={inp} />
+        <input placeholder="Monto *" value={form.amount} onChange={set("amount")} inputMode="decimal" style={inp} />
         <input placeholder="Categoría (ej: Entretenimiento)" value={form.category} onChange={set("category")} style={inp} />
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
           <select value={form.billing} onChange={set("billing")} style={inp}>
@@ -192,7 +200,10 @@ function SubModal({ initial, tokens, onSave, onClose }) {
         </div>
       </div>
       <div style={{ display: "flex", justifyContent: "flex-end", gap: 8, marginTop: 18 }}>
-        <button onClick={onClose} style={{ ...inp, width: "auto", padding: "8px 16px", cursor: "pointer" }}>
+        <button
+          onClick={onClose}
+          style={{ ...inp, width: "auto", padding: "10px 18px", cursor: "pointer", fontSize: 14 }}
+        >
           Cancelar
         </button>
         <PrimaryButton onClick={handleSave} ariaLabel="Guardar suscripcion">Guardar</PrimaryButton>

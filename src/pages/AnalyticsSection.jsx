@@ -6,8 +6,11 @@ import {
 import ChartCard from "@/components/charts/ChartCard";
 import EmptyState from "@/components/ui/EmptyState";
 import { fmtShort } from "@/data/financeData";
+import { useIsMobile } from "@/hooks/useIsMobile";
 
 function AnalyticsSection({ transactions, categories, tokens }) {
+  const isMobile = useIsMobile();
+
   const catData = useMemo(
     () =>
       categories
@@ -23,8 +26,6 @@ function AnalyticsSection({ transactions, categories, tokens }) {
     [categories, transactions],
   );
 
-  const chartHeight = Math.max(260, catData.length * 46);
-
   if (catData.length === 0) {
     return (
       <ChartCard title="Gasto por categoría" height={200}>
@@ -33,18 +34,21 @@ function AnalyticsSection({ transactions, categories, tokens }) {
     );
   }
 
+  const chartHeight = Math.max(isMobile ? 200 : 260, catData.length * (isMobile ? 38 : 44));
+  const yAxisWidth  = isMobile ? 80 : 100;
+
   return (
     <ChartCard title="Gasto por categoría" height={chartHeight}>
       <ResponsiveContainer width="100%" height={chartHeight}>
         <BarChart
           data={catData}
           layout="vertical"
-          margin={{ top: 4, right: 40, left: 0, bottom: 4 }}
+          margin={{ top: 4, right: isMobile ? 16 : 32, left: 0, bottom: 4 }}
         >
-          <CartesianGrid strokeDasharray="3 3" stroke={tokens.chart.grid} />
+          <CartesianGrid strokeDasharray="3 3" stroke={tokens.chart.grid} horizontal={false} />
           <XAxis
             type="number"
-            tick={{ fill: tokens.chart.tick, fontSize: 11 }}
+            tick={{ fill: tokens.chart.tick, fontSize: isMobile ? 10 : 11 }}
             axisLine={false}
             tickLine={false}
             tickFormatter={(v) => fmtShort(v)}
@@ -52,10 +56,10 @@ function AnalyticsSection({ transactions, categories, tokens }) {
           <YAxis
             dataKey="name"
             type="category"
-            tick={{ fill: tokens.chart.tick, fontSize: 12 }}
+            tick={{ fill: tokens.chart.tick, fontSize: isMobile ? 11 : 12 }}
             axisLine={false}
             tickLine={false}
-            width={100}
+            width={yAxisWidth}
           />
           <Tooltip
             contentStyle={{
@@ -68,9 +72,7 @@ function AnalyticsSection({ transactions, categories, tokens }) {
             formatter={(v) => [`$${v.toLocaleString()}`, "Total"]}
           />
           <Bar dataKey="total" radius={[0, 6, 6, 0]}>
-            {catData.map((c) => (
-              <Cell key={c.name} fill={c.fill} />
-            ))}
+            {catData.map((c) => <Cell key={c.name} fill={c.fill} />)}
           </Bar>
         </BarChart>
       </ResponsiveContainer>

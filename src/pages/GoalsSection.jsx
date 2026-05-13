@@ -5,11 +5,13 @@ import Modal from "@/components/ui/Modal";
 import PrimaryButton from "@/components/ui/PrimaryButton";
 import EmptyState from "@/components/ui/EmptyState";
 import { fmtShort } from "@/data/financeData";
+import { useIsMobile } from "@/hooks/useIsMobile";
 
 const EMOJI_OPTS = ["🎯","🛡️","🏍️","🏠","✈️","💻","📱","🎓","💍","🚗","🏦","💰","🌴","💎","🎮","🌍"];
 const COLOR_OPTS = ["#6366f1","#f59e0b","#10b981","#f43f5e","#3b82f6","#8b5cf6","#ec4899","#06b6d4","#84cc16","#14b8a6"];
 
 function GoalsSection({ goals, addGoal, updateGoal, deleteGoal, tokens }) {
+  const isMobile = useIsMobile();
   const [showModal, setShowModal] = useState(false);
   const [editing,   setEditing]   = useState(null);
 
@@ -32,7 +34,11 @@ function GoalsSection({ goals, addGoal, updateGoal, deleteGoal, tokens }) {
       {goals.length === 0 ? (
         <EmptyState text="No hay metas. ¡Agrega tu primera meta financiera!" />
       ) : (
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(280px,1fr))", gap: 12 }}>
+        <div style={{
+          display: "grid",
+          gridTemplateColumns: isMobile ? "1fr" : "repeat(auto-fit,minmax(280px,1fr))",
+          gap: 12,
+        }}>
           <AnimatePresence>
             {goals.map((g) => (
               <motion.div
@@ -40,7 +46,6 @@ function GoalsSection({ goals, addGoal, updateGoal, deleteGoal, tokens }) {
                 initial={{ opacity: 0, y: 16 }}
                 animate={{ opacity: 1, y: 0  }}
                 exit={{ opacity: 0, scale: 0.95 }}
-                whileHover={{ y: -3 }}
               >
                 <GoalCard
                   goal={g}
@@ -74,37 +79,44 @@ function GoalCard({ goal, tokens, onEdit, onDelete }) {
 
   return (
     <GlassCard>
-      {/* Header */}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 12 }}>
-        <div>
+        <div style={{ minWidth: 0, flex: 1, marginRight: 8 }}>
           <div style={{ fontSize: 24, marginBottom: 4 }}>{goal.emoji}</div>
-          <div style={{ fontSize: 15, fontWeight: 600, color: tokens.text.primary }}>
+          <div style={{
+            fontSize: 15, fontWeight: 600, color: tokens.text.primary,
+            overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+          }}>
             {goal.name}
           </div>
           <div style={{ fontSize: 12, color: tokens.text.tertiary, marginTop: 2 }}>
             Hasta {goal.deadline}
           </div>
         </div>
-        <div style={{ display: "flex", gap: 6 }}>
-          <ActionBtn onClick={onEdit} bg={tokens.bg.subtle} border={tokens.border.default} color={tokens.text.secondary}>
+        <div style={{ display: "flex", gap: 6, flexShrink: 0 }}>
+          <button
+            onClick={onEdit}
+            style={{
+              background: tokens.bg.subtle,
+              border: `1px solid ${tokens.border.default}`,
+              borderRadius: 8, padding: "6px 8px", cursor: "pointer", fontSize: 14,
+            }}
+          >
             ✏️
-          </ActionBtn>
-          <ActionBtn onClick={onDelete} bg={tokens.accent.redDim} border="transparent" color={tokens.accent.red}>
+          </button>
+          <button
+            onClick={onDelete}
+            style={{
+              background: tokens.accent.redDim, border: "none",
+              borderRadius: 8, padding: "6px 8px", cursor: "pointer", fontSize: 14,
+            }}
+          >
             🗑️
-          </ActionBtn>
+          </button>
         </div>
       </div>
 
       {/* Progress bar */}
-      <div
-        style={{
-          background: tokens.bg.muted,
-          borderRadius: 99,
-          height: 8,
-          marginBottom: 10,
-          overflow: "hidden",
-        }}
-      >
+      <div style={{ background: tokens.bg.muted, borderRadius: 99, height: 8, marginBottom: 10, overflow: "hidden" }}>
         <motion.div
           initial={{ width: 0 }}
           animate={{ width: `${pct}%` }}
@@ -113,7 +125,6 @@ function GoalCard({ goal, tokens, onEdit, onDelete }) {
         />
       </div>
 
-      {/* Stats */}
       <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13, color: tokens.text.secondary }}>
         <span>{fmtShort(goal.current)} / {fmtShort(goal.target)}</span>
         <span style={{ fontWeight: 700, color: goal.color }}>{pct.toFixed(0)}%</span>
@@ -147,7 +158,18 @@ function GoalModal({ initial, tokens, onSave, onClose }) {
     deadline: initial?.deadline ?? new Date().toISOString().slice(0, 7),
   });
 
-  const inp = inputStyle(tokens);
+  const inp = {
+    width: "100%",
+    padding: "11px 13px",
+    borderRadius: 10,
+    border: `1px solid ${tokens.border.default}`,
+    background: tokens.input.bg,
+    color: tokens.input.color,
+    fontSize: 15,
+    outline: "none",
+    colorScheme: tokens.input.colorScheme,
+    minWidth: 0,
+  };
 
   const handleSave = () => {
     if (!form.name.trim() || !form.target) return;
@@ -168,51 +190,45 @@ function GoalModal({ initial, tokens, onSave, onClose }) {
       </div>
 
       <div style={{ display: "grid", gap: 10 }}>
-        <div style={{ display: "grid", gridTemplateColumns: "56px 1fr", gap: 8 }}>
-          <select value={form.emoji} onChange={set("emoji")} style={{ ...inp, fontSize: 18, textAlign: "center" }}>
+        <div style={{ display: "grid", gridTemplateColumns: "60px 1fr", gap: 8 }}>
+          <select value={form.emoji} onChange={set("emoji")} style={{ ...inp, fontSize: 20, textAlign: "center", padding: "8px 4px" }}>
             {EMOJI_OPTS.map((e) => <option key={e} value={e}>{e}</option>)}
           </select>
-          <input placeholder="Nombre de la meta *" value={form.name} onChange={set("name")} style={inp} />
+          <input placeholder="Nombre de la meta *" value={form.name} onChange={set("name")} style={inp} autoFocus />
         </div>
-        <input placeholder="Monto objetivo *"       value={form.target}   onChange={set("target")}   style={inp} />
-        <input placeholder="Monto actual"            value={form.current}  onChange={set("current")}  style={inp} />
-        <input placeholder="Aporte mensual"          value={form.monthly}  onChange={set("monthly")}  style={inp} />
+        <input placeholder="Monto objetivo *"  value={form.target}   onChange={set("target")}  inputMode="decimal" style={inp} />
+        <input placeholder="Monto actual"       value={form.current}  onChange={set("current")} inputMode="decimal" style={inp} />
+        <input placeholder="Aporte mensual"     value={form.monthly}  onChange={set("monthly")} inputMode="decimal" style={inp} />
 
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
-          {/* Color picker */}
-          <div>
-            <div style={{ fontSize: 11, color: tokens.text.tertiary, marginBottom: 6, textTransform: "uppercase" }}>
-              Color
-            </div>
-            <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-              {COLOR_OPTS.map((c) => (
-                <button
-                  key={c}
-                  onClick={() => setForm((p) => ({ ...p, color: c }))}
-                  style={{
-                    width: 24, height: 24, borderRadius: 6,
-                    background: c,
-                    border: form.color === c
-                      ? `2px solid ${tokens.text.primary}`
-                      : "2px solid transparent",
-                    cursor: "pointer",
-                  }}
-                />
-              ))}
-            </div>
+        {/* Deadline */}
+        <input type="month" value={form.deadline} onChange={set("deadline")} style={inp} />
+
+        {/* Color swatches */}
+        <div>
+          <div style={{ fontSize: 11, color: tokens.text.tertiary, marginBottom: 6, textTransform: "uppercase", fontWeight: 700 }}>
+            Color
           </div>
-          {/* Deadline */}
-          <div>
-            <div style={{ fontSize: 11, color: tokens.text.tertiary, marginBottom: 6, textTransform: "uppercase" }}>
-              Fecha límite
-            </div>
-            <input type="month" value={form.deadline} onChange={set("deadline")} style={inp} />
+          <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+            {COLOR_OPTS.map((c) => (
+              <button
+                key={c}
+                onClick={() => setForm((p) => ({ ...p, color: c }))}
+                style={{
+                  width: 28, height: 28, borderRadius: 7, background: c,
+                  border: form.color === c ? `2px solid ${tokens.text.primary}` : "2px solid transparent",
+                  cursor: "pointer", flexShrink: 0,
+                }}
+              />
+            ))}
           </div>
         </div>
       </div>
 
       <div style={{ display: "flex", justifyContent: "flex-end", gap: 8, marginTop: 18 }}>
-        <button onClick={onClose} style={{ ...inp, width: "auto", padding: "8px 16px", cursor: "pointer" }}>
+        <button
+          onClick={onClose}
+          style={{ ...inp, width: "auto", padding: "10px 18px", cursor: "pointer", fontSize: 14 }}
+        >
           Cancelar
         </button>
         <PrimaryButton onClick={handleSave} ariaLabel="Guardar meta">Guardar</PrimaryButton>
@@ -220,39 +236,6 @@ function GoalModal({ initial, tokens, onSave, onClose }) {
     </Modal>
   );
 }
-
-// ── Helpers ────────────────────────────────────────────────────────────────────
-
-function ActionBtn({ children, onClick, bg, border, color }) {
-  return (
-    <button
-      onClick={onClick}
-      style={{
-        background: bg,
-        border: `1px solid ${border}`,
-        borderRadius: 8,
-        padding: "5px 8px",
-        cursor: "pointer",
-        fontSize: 13,
-        color,
-      }}
-    >
-      {children}
-    </button>
-  );
-}
-
-const inputStyle = (tokens) => ({
-  width: "100%",
-  padding: "9px 12px",
-  borderRadius: 10,
-  border: `1px solid ${tokens.border.default}`,
-  background: tokens.input.bg,
-  color: tokens.input.color,
-  fontSize: 14,
-  outline: "none",
-  colorScheme: tokens.input.colorScheme,
-});
 
 const parseNum = (v) => parseFloat(String(v).replace(/[^\d.]/g, "")) || 0;
 

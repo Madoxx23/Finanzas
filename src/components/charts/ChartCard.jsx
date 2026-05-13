@@ -2,7 +2,7 @@ import { memo } from "react";
 import GlassCard from "@/components/ui/GlassCard";
 import { useTheme } from "@/context/ThemeContext";
 
-function ChartCard({ title, children, height = 260 }) {
+function ChartCard({ title, children, height = 240 }) {
   const { tokens } = useTheme();
   return (
     <GlassCard>
@@ -18,7 +18,10 @@ function ChartCard({ title, children, height = 260 }) {
       >
         {title}
       </div>
-      <div style={{ width: "100%", height }}>{children}</div>
+      {/* overflow:hidden is critical — prevents Recharts from overflowing on mobile */}
+      <div style={{ width: "100%", height, overflow: "hidden" }}>
+        {children}
+      </div>
     </GlassCard>
   );
 }
