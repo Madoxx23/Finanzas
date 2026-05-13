@@ -5,7 +5,14 @@ import { useTheme } from "@/context/ThemeContext";
 
 const METHODS = ["Debito", "Credito", "Transferencia", "Efectivo", "App"];
 
-export default function QuickAddModal({ onClose, onSave, categories }) {
+function defaultDate(activeMonth) {
+  if (!activeMonth || activeMonth === "all") return new Date().toISOString().slice(0, 10);
+  const today = new Date().toISOString().slice(0, 7);
+  // If active month is current month → use today; otherwise → first day of that month
+  return activeMonth === today ? new Date().toISOString().slice(0, 10) : `${activeMonth}-01`;
+}
+
+export default function QuickAddModal({ onClose, onSave, categories, activeMonth }) {
   const { tokens } = useTheme();
   const [form, setForm] = useState({
     name:     "",
@@ -13,7 +20,7 @@ export default function QuickAddModal({ onClose, onSave, categories }) {
     type:     "expense",
     category: categories[0]?.name ?? "",
     method:   "Debito",
-    date:     new Date().toISOString().slice(0, 10),
+    date:     defaultDate(activeMonth),
     note:     "",
   });
 
@@ -43,14 +50,7 @@ export default function QuickAddModal({ onClose, onSave, categories }) {
 
   return (
     <Modal open onClose={onClose} maxWidth={480} title="Registrar movimiento">
-      <div
-        style={{
-          fontSize: 17,
-          fontWeight: 700,
-          color: tokens.text.primary,
-          marginBottom: 16,
-        }}
-      >
+      <div style={{ fontSize: 17, fontWeight: 700, color: tokens.text.primary, marginBottom: 16 }}>
         Registrar movimiento
       </div>
 

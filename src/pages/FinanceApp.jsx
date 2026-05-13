@@ -179,7 +179,8 @@ function FinanceAppInner() {
           <MonthsSection
             activeMonth={activeMonth}
             setActiveMonth={setActiveMonth}
-            monthOptions={monthOptions}
+            transactions={transactions}
+            onNavigate={setActiveSection}
             tokens={tokens}
           />
         );
@@ -225,6 +226,7 @@ function FinanceAppInner() {
           onClose={closeQuickAdd}
           onSave={handleSave}
           categories={categories}
+          activeMonth={activeMonth}
           tokens={tokens}
         />
       )}
