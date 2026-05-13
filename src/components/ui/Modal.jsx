@@ -1,15 +1,14 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useId } from "react";
-import { tokens } from "@/styles/tokens";
+import { useTheme } from "@/context/ThemeContext";
 
 export default function Modal({ open, onClose, children, maxWidth = 520, title = "Dialog" }) {
+  const { tokens } = useTheme();
   const titleId = useId();
 
   useEffect(() => {
     if (!open) return;
-    const onKeyDown = (event) => {
-      if (event.key === "Escape") onClose();
-    };
+    const onKeyDown = (e) => { if (e.key === "Escape") onClose(); };
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [open, onClose]);
@@ -25,19 +24,19 @@ export default function Modal({ open, onClose, children, maxWidth = 520, title =
           style={{
             position: "fixed",
             inset: 0,
-            background: "rgba(0,0,0,0.55)",
+            background: tokens.bg.overlay,
             backdropFilter: "blur(10px)",
             display: "flex",
             alignItems: "flex-end",
             justifyContent: "center",
-            zIndex: tokens.z.modal,
-            padding: "0 12px",
+            zIndex: 1300,
+            padding: "0 0",
           }}
         >
           <motion.div
-            initial={{ y: 40, opacity: 0 }}
+            initial={{ y: 60, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
-            exit={{ y: 40, opacity: 0 }}
+            exit={{ y: 60, opacity: 0 }}
             transition={{ type: "spring", stiffness: 320, damping: 30 }}
             onClick={(e) => e.stopPropagation()}
             role="dialog"
@@ -47,12 +46,13 @@ export default function Modal({ open, onClose, children, maxWidth = 520, title =
             style={{
               width: "100%",
               maxWidth,
-              marginBottom: 0,
-              borderRadius: "22px 22px 0 0",
-              border: "1px solid rgba(255,255,255,0.08)",
-              background: tokens.gradient.modal,
+              borderRadius: "24px 24px 0 0",
+              border: `1px solid ${tokens.glass.border}`,
+              borderBottom: "none",
+              background: tokens.glass.bg,
+              backdropFilter: tokens.glass.backdropFilter,
               boxShadow: tokens.shadow.modal,
-              padding: 18,
+              padding: "22px 20px 32px",
             }}
           >
             <h2 id={titleId} style={{ fontSize: 1, margin: 0, padding: 0, height: 0, overflow: "hidden" }}>

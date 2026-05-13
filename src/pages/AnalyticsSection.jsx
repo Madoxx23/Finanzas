@@ -1,30 +1,76 @@
 import { memo, useMemo } from "react";
-import { Bar, BarChart, CartesianGrid, Cell, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import {
+  Bar, BarChart, CartesianGrid, Cell,
+  ResponsiveContainer, Tooltip, XAxis, YAxis,
+} from "recharts";
 import ChartCard from "@/components/charts/ChartCard";
+import EmptyState from "@/components/ui/EmptyState";
+import { fmtShort } from "@/data/financeData";
 
-function AnalyticsSection({ transactions, categories }) {
+function AnalyticsSection({ transactions, categories, tokens }) {
   const catData = useMemo(
     () =>
       categories
         .map((c) => ({
-          name: c.name,
-          total: transactions.filter((t) => t.category === c.name && t.type === "expense").reduce((a, t) => a + t.amount, 0),
+          name:  c.name,
+          total: transactions
+            .filter((t) => t.category === c.name && t.type === "expense")
+            .reduce((a, t) => a + t.amount, 0),
           fill: c.color,
         }))
-        .filter((c) => c.total > 0),
-    [categories, transactions]
+        .filter((c) => c.total > 0)
+        .sort((a, b) => b.total - a.total),
+    [categories, transactions],
   );
 
+  const chartHeight = Math.max(260, catData.length * 46);
+
+  if (catData.length === 0) {
+    return (
+      <ChartCard title="Gasto por categoría" height={200}>
+        <EmptyState text="Sin gastos registrados. ¡Agrega transacciones!" />
+      </ChartCard>
+    );
+  }
+
   return (
-    <ChartCard title="Gasto por categoria" height={300}>
-      <ResponsiveContainer width="100%" height={300}>
-        <BarChart data={catData} layout="vertical" margin={{ top: 5, right: 30, left: 0, bottom: 5 }}>
-          <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" />
-          <XAxis type="number" tick={{ fill: "rgba(255,255,255,0.35)", fontSize: 11 }} axisLine={false} tickLine={false} />
-          <YAxis dataKey="name" type="category" tick={{ fill: "rgba(255,255,255,0.45)", fontSize: 12 }} axisLine={false} tickLine={false} width={95} />
-          <Tooltip contentStyle={{ background: "rgba(15,15,25,0.95)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 12, color: "#fff" }} />
+    <ChartCard title="Gasto por categoría" height={chartHeight}>
+      <ResponsiveContainer width="100%" height={chartHeight}>
+        <BarChart
+          data={catData}
+          layout="vertical"
+          margin={{ top: 4, right: 40, left: 0, bottom: 4 }}
+        >
+          <CartesianGrid strokeDasharray="3 3" stroke={tokens.chart.grid} />
+          <XAxis
+            type="number"
+            tick={{ fill: tokens.chart.tick, fontSize: 11 }}
+            axisLine={false}
+            tickLine={false}
+            tickFormatter={(v) => fmtShort(v)}
+          />
+          <YAxis
+            dataKey="name"
+            type="category"
+            tick={{ fill: tokens.chart.tick, fontSize: 12 }}
+            axisLine={false}
+            tickLine={false}
+            width={100}
+          />
+          <Tooltip
+            contentStyle={{
+              background:   tokens.chart.tooltip.bg,
+              border:       `1px solid ${tokens.chart.tooltip.border}`,
+              borderRadius: 12,
+              color:        tokens.text.primary,
+              fontSize:     13,
+            }}
+            formatter={(v) => [`$${v.toLocaleString()}`, "Total"]}
+          />
           <Bar dataKey="total" radius={[0, 6, 6, 0]}>
-            {catData.map((c) => <Cell key={c.name} fill={c.fill} />)}
+            {catData.map((c) => (
+              <Cell key={c.name} fill={c.fill} />
+            ))}
           </Bar>
         </BarChart>
       </ResponsiveContainer>

@@ -1,61 +1,129 @@
 import { useState } from "react";
 import PrimaryButton from "@/components/ui/PrimaryButton";
 import Modal from "@/components/ui/Modal";
+import { useTheme } from "@/context/ThemeContext";
+
+const METHODS = ["Debito", "Credito", "Transferencia", "Efectivo", "App"];
 
 export default function QuickAddModal({ onClose, onSave, categories }) {
+  const { tokens } = useTheme();
   const [form, setForm] = useState({
-    amount: "",
-    type: "expense",
+    name:     "",
+    amount:   "",
+    type:     "expense",
     category: categories[0]?.name ?? "",
-    method: "Debito",
-    date: new Date().toISOString().slice(0, 10),
-    note: "",
-    name: "",
+    method:   "Debito",
+    date:     new Date().toISOString().slice(0, 10),
+    note:     "",
   });
 
+  const inp = {
+    width: "100%",
+    padding: "10px 12px",
+    borderRadius: 12,
+    border: `1px solid ${tokens.border.default}`,
+    background: tokens.input.bg,
+    color: tokens.input.color,
+    fontSize: 14,
+    outline: "none",
+    colorScheme: tokens.input.colorScheme,
+  };
+
   const handleSave = () => {
-    if (!form.amount || !form.name || !form.category) return;
+    if (!form.name.trim() || !form.amount || !form.category) return;
     onSave({
-      id: `t_${Date.now()}`,
+      id:     `t_${Date.now()}`,
       ...form,
-      amount: parseFloat(form.amount.replace(/[^\d]/g, "")),
+      amount: parseFloat(String(form.amount).replace(/[^\d.]/g, "")),
     });
     onClose();
   };
 
+  const set = (key) => (e) => setForm((p) => ({ ...p, [key]: e.target.value }));
+
   return (
     <Modal open onClose={onClose} maxWidth={480} title="Registrar movimiento">
-        <div style={{ fontSize: 18, fontWeight: 600, marginBottom: 14 }}>Registrar movimiento</div>
-        <div style={{ display: "grid", gap: 10 }}>
-          <input aria-label="Descripcion de movimiento" placeholder="Descripcion" value={form.name} onChange={(e) => setForm((p) => ({ ...p, name: e.target.value }))} style={inputStyle} />
-          <input aria-label="Valor del movimiento" placeholder="Valor" value={form.amount} onChange={(e) => setForm((p) => ({ ...p, amount: e.target.value }))} style={inputStyle} />
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
-            <select aria-label="Tipo de movimiento" value={form.type} onChange={(e) => setForm((p) => ({ ...p, type: e.target.value }))} style={inputStyle}>
-              <option value="expense">Gasto</option>
-              <option value="income">Ingreso</option>
-              <option value="savings">Ahorro</option>
-            </select>
-            <select aria-label="Categoria de movimiento" value={form.category} onChange={(e) => setForm((p) => ({ ...p, category: e.target.value }))} style={inputStyle}>
-              {categories.map((c) => <option key={c.id} value={c.name}>{c.emoji} {c.name}</option>)}
-            </select>
-          </div>
-          <input aria-label="Fecha del movimiento" type="date" value={form.date} onChange={(e) => setForm((p) => ({ ...p, date: e.target.value }))} style={inputStyle} />
+      <div
+        style={{
+          fontSize: 17,
+          fontWeight: 700,
+          color: tokens.text.primary,
+          marginBottom: 16,
+        }}
+      >
+        Registrar movimiento
+      </div>
+
+      <div style={{ display: "grid", gap: 10 }}>
+        <input
+          aria-label="Descripcion"
+          placeholder="Descripcion *"
+          value={form.name}
+          onChange={set("name")}
+          style={inp}
+        />
+        <input
+          aria-label="Valor"
+          placeholder="Valor * (ej: 150000)"
+          value={form.amount}
+          onChange={set("amount")}
+          style={inp}
+        />
+
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+          <select aria-label="Tipo" value={form.type} onChange={set("type")} style={inp}>
+            <option value="expense">Gasto</option>
+            <option value="income">Ingreso</option>
+            <option value="savings">Ahorro</option>
+          </select>
+          <select aria-label="Categoria" value={form.category} onChange={set("category")} style={inp}>
+            {categories.map((c) => (
+              <option key={c.id} value={c.name}>
+                {c.emoji} {c.name}
+              </option>
+            ))}
+          </select>
         </div>
-        <div style={{ display: "flex", justifyContent: "flex-end", gap: 8, marginTop: 16 }}>
-          <button aria-label="Cancelar registro" onClick={onClose} style={{ ...inputStyle, width: 96, cursor: "pointer" }}>Cancelar</button>
-          <PrimaryButton ariaLabel="Guardar movimiento" onClick={handleSave}>Guardar</PrimaryButton>
+
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+          <select aria-label="Metodo" value={form.method} onChange={set("method")} style={inp}>
+            {METHODS.map((m) => <option key={m} value={m}>{m}</option>)}
+          </select>
+          <input
+            aria-label="Fecha"
+            type="date"
+            value={form.date}
+            onChange={set("date")}
+            style={inp}
+          />
         </div>
+
+        <input
+          aria-label="Nota"
+          placeholder="Nota (opcional)"
+          value={form.note}
+          onChange={set("note")}
+          style={inp}
+        />
+      </div>
+
+      <div style={{ display: "flex", justifyContent: "flex-end", gap: 8, marginTop: 18 }}>
+        <button
+          aria-label="Cancelar"
+          onClick={onClose}
+          style={{
+            ...inp,
+            width: "auto",
+            padding: "8px 16px",
+            cursor: "pointer",
+          }}
+        >
+          Cancelar
+        </button>
+        <PrimaryButton ariaLabel="Guardar movimiento" onClick={handleSave}>
+          Guardar
+        </PrimaryButton>
+      </div>
     </Modal>
   );
 }
-
-const inputStyle = {
-  width: "100%",
-  padding: "10px 12px",
-  borderRadius: 12,
-  border: "1px solid rgba(255,255,255,0.08)",
-  background: "rgba(255,255,255,0.04)",
-  color: "#fff",
-  fontSize: 14,
-  outline: "none",
-};

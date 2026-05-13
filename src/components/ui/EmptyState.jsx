@@ -1,4 +1,7 @@
+import { useTheme } from "@/context/ThemeContext";
+
 export default function EmptyState({ text = "Sin resultados" }) {
+  const { tokens } = useTheme();
   return (
     <div
       role="status"
@@ -6,13 +9,13 @@ export default function EmptyState({ text = "Sin resultados" }) {
       style={{
         textAlign: "center",
         padding: 48,
-        color: "rgba(255,255,255,0.4)",
+        color: tokens.text.tertiary,
         fontSize: 14,
-        border: "1px dashed rgba(255,255,255,0.12)",
+        border: `1px dashed ${tokens.border.default}`,
         borderRadius: 14,
       }}
     >
-      <div style={{ fontSize: 26, marginBottom: 8 }}>◌</div>
+      <div style={{ fontSize: 28, marginBottom: 10 }}>◌</div>
       {text}
     </div>
   );

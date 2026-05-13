@@ -1,20 +1,22 @@
-import { tokens } from "@/styles/tokens";
+import { useTheme } from "@/context/ThemeContext";
 
 export default function Dropdown({ value, onChange, options, style = {}, ariaLabel = "Dropdown" }) {
+  const { tokens } = useTheme();
   return (
     <select
       aria-label={ariaLabel}
       value={value}
       onChange={(e) => onChange(e.target.value)}
       style={{
-        width: "100%",
-        padding: `${tokens.spacing.sm}px ${tokens.spacing.md}px`,
-        borderRadius: tokens.radius.md,
-        border: `1px solid ${tokens.color.panelBorder}`,
-        background: "rgba(255,255,255,0.04)",
-        color: tokens.color.text,
-        fontSize: tokens.typography.body,
+        padding: "10px 12px",
+        borderRadius: 12,
+        border: `1px solid ${tokens.border.default}`,
+        background: tokens.input.bg,
+        color: tokens.input.color,
+        fontSize: 14,
         outline: "none",
+        cursor: "pointer",
+        colorScheme: tokens.input.colorScheme,
         ...style,
       }}
     >

@@ -1,9 +1,8 @@
 import { memo, useEffect, useState } from "react";
 import SidebarNav from "@/components/navigation/SidebarNav";
 import MobileBottomNav from "@/components/navigation/MobileBottomNav";
-import GlassCard from "@/components/ui/GlassCard";
 import PrimaryButton from "@/components/ui/PrimaryButton";
-import { tokens } from "@/styles/tokens";
+import { useTheme } from "@/context/ThemeContext";
 
 function AppLayout({
   title,
@@ -13,7 +12,9 @@ function AppLayout({
   onSelectSection,
   onQuickAdd,
   children,
+  themeToggle,
 }) {
+  const { tokens } = useTheme();
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
 
@@ -25,7 +26,15 @@ function AppLayout({
   }, []);
 
   return (
-    <div style={{ display: "flex", height: "100vh", background: tokens.color.bg, color: tokens.color.text, overflow: "hidden" }}>
+    <div
+      style={{
+        display: "flex",
+        height: "100vh",
+        background: tokens.bg.base,
+        color: tokens.text.primary,
+        overflow: "hidden",
+      }}
+    >
       {!isMobile && (
         <SidebarNav
           sidebarOpen={sidebarOpen}
@@ -35,32 +44,87 @@ function AppLayout({
           onSelect={onSelectSection}
         />
       )}
+
       <div style={{ flex: 1, display: "flex", flexDirection: "column", minWidth: 0 }}>
-        <header role="banner"
+        {/* ── Header ── */}
+        <header
+          role="banner"
           style={{
             height: 62,
-            borderBottom: `1px solid ${tokens.color.panelBorder}`,
+            borderBottom: `1px solid ${tokens.header.border}`,
             display: "flex",
             alignItems: "center",
-            gap: tokens.spacing.md,
-            padding: `0 ${tokens.spacing.lg}px`,
-            background: "rgba(10,10,15,0.8)",
-            backdropFilter: "blur(12px)",
+            gap: 10,
+            padding: "0 16px",
+            background: tokens.header.bg,
+            backdropFilter: tokens.header.backdropFilter,
+            flexShrink: 0,
           }}
         >
-          <h1 style={{ flex: 1, fontWeight: 600, margin: 0, fontSize: 16 }}>{title}</h1>
-          <GlassCard style={{ padding: "6px 12px", borderRadius: 12 }}>
-            <span style={{ fontSize: 11, color: "rgba(255,255,255,0.4)" }}>BALANCE</span>
-            <span style={{ fontSize: 14, fontWeight: 700, marginLeft: 8 }}>{balanceLabel}</span>
-          </GlassCard>
-          <PrimaryButton ariaLabel="Registrar transaccion" onClick={onQuickAdd}>Registrar</PrimaryButton>
+          {/* Mobile hamburger placeholder – MobileBottomNav handles nav */}
+          <h1
+            style={{
+              flex: 1,
+              fontWeight: 700,
+              margin: 0,
+              fontSize: isMobile ? 15 : 16,
+              color: tokens.text.primary,
+              whiteSpace: "nowrap",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+            }}
+          >
+            {isMobile ? "💰 Mind Finance" : title}
+          </h1>
+
+          {/* Balance chip */}
+          <div
+            style={{
+              padding: "5px 10px",
+              borderRadius: 10,
+              border: `1px solid ${tokens.border.default}`,
+              background: tokens.bg.muted,
+              whiteSpace: "nowrap",
+              flexShrink: 0,
+            }}
+          >
+            <span style={{ fontSize: 10, color: tokens.text.tertiary, textTransform: "uppercase" }}>
+              Balance
+            </span>
+            <span style={{ fontSize: 14, fontWeight: 700, marginLeft: 6, color: tokens.text.primary }}>
+              {balanceLabel}
+            </span>
+          </div>
+
+          {/* Theme toggle — desktop only */}
+          {!isMobile && themeToggle}
+
+          {/* Quick-add button */}
+          <PrimaryButton ariaLabel="Registrar transaccion" onClick={onQuickAdd}>
+            {isMobile ? "+" : "Registrar"}
+          </PrimaryButton>
         </header>
-        <main id="app-main-content" role="main" style={{ flex: 1, overflowY: "auto", padding: isMobile ? "14px 14px 84px" : 16 }}>
+
+        {/* ── Main content ── */}
+        <main
+          id="app-main-content"
+          role="main"
+          style={{
+            flex: 1,
+            overflowY: "auto",
+            padding: isMobile ? "14px 12px 104px" : "16px",
+          }}
+        >
           {children}
         </main>
       </div>
+
       {isMobile && (
-        <MobileBottomNav navItems={navItems} activeSection={activeSection} onSelect={onSelectSection} />
+        <MobileBottomNav
+          navItems={navItems}
+          activeSection={activeSection}
+          onSelect={onSelectSection}
+        />
       )}
     </div>
   );

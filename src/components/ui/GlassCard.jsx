@@ -1,15 +1,17 @@
 import { memo } from "react";
-import { tokens } from "@/styles/tokens";
+import { useTheme } from "@/context/ThemeContext";
 
 function GlassCard({ children, style = {}, as = "div" }) {
+  const { tokens } = useTheme();
   const Component = as;
   return (
     <Component
       style={{
-        background: tokens.color.panel,
-        border: `1px solid ${tokens.color.panelBorder}`,
-        borderRadius: tokens.radius.lg,
-        padding: tokens.spacing.xl,
+        background: tokens.bg.surface,
+        border: `1px solid ${tokens.border.default}`,
+        borderRadius: 16,
+        padding: 20,
+        boxShadow: tokens.shadow.card,
         ...style,
       }}
     >
